@@ -1,0 +1,42 @@
+{
+  "$schema": "https://raw.githubusercontent.com/t8y2/dbx/plugin-sdk-v1/plugins/manifest.schema.json",
+  "manifest_version": 1,
+  "id": "com.polaris.api",
+  "name": "polaris-api",
+  "version": "0.1.0",
+  "publisher": "misxzaiz",
+  "description": "API 资产库：从 OpenAPI/Swagger 与 Postman Collection 导入接口，整理为可搜索的目录树；浏览每个接口的方法、路径、参数、请求体与响应 Schema，一键复制 cURL、导出 Markdown/JSON。",
+  "icon": "assets/plugin.svg",
+  "permissions": [],
+  "engines": {
+    "dbx": ">=0.5.68",
+    "host_api": "1"
+  },
+  "entrypoints": {
+    "ui": {
+      "root": "ui",
+      "entry": "ui/index.html"
+    }
+  },
+  "contributions": [
+    {
+      "type": "workbench",
+      "id": "com.polaris.api.workbench",
+      "label": "polaris-api",
+      "description": "API 资产库：导入 OpenAPI/Postman Collection，浏览与整理接口目录。",
+      "icon": "assets/plugin.svg"
+    }
+  ],
+  "localizations": {
+    "zh-CN": {
+      "name": "polaris-api",
+      "description": "API 资产库：从 OpenAPI/Swagger 与 Postman Collection 导入接口，整理为可搜索目录树；浏览方法、路径、参数、请求体与响应 Schema，一键复制 cURL、导出 Markdown/JSON。",
+      "contributions": {
+        "com.polaris.api.workbench": {
+          "label": "polaris-api",
+          "description": "API 资产库：导入 OpenAPI/Postman Collection，浏览与整理接口目录。"
+        }
+      }
+    }
+  }
+}
