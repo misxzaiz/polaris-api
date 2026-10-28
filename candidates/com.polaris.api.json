@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "com.polaris.api",
+  "publisher": "misxzaiz",
+  "source": "https://github.com/misxzaiz/polaris-api",
+  "version": "0.1.0",
+  "releaseNotes": "Initial release: import OpenAPI/Swagger and Postman Collection v2.1 into a searchable endpoint catalog tree with per-endpoint parameter/body/schema browsing, cURL copy and Markdown export.",
+  "name": "polaris-api",
+  "description": "API asset library: import OpenAPI/Swagger and Postman Collections into a searchable catalog tree; browse method, path, parameters, request body and response schemas per endpoint; one-click cURL copy and Markdown export.",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/misxzaiz/polaris-api",
+  "tags": [
+    "api",
+    "openapi",
+    "swagger",
+    "postman",
+    "documentation",
+    "debugging"
+  ],
+  "permissions": [],
+  "localizations": {
+    "zh-CN": {
+      "name": "polaris-api",
+      "description": "API 资产库：从 OpenAPI/Swagger 与 Postman Collection 导入接口，整理为可搜索的目录树；浏览每个接口的方法、路径、参数、请求体与响应 Schema，一键复制 cURL、导出 Markdown。"
+    }
+  },
+  "targets": [
+    {
+      "target": "universal",
+      "url": "https://github.com/misxzaiz/polaris-api/releases/download/v0.1.0/com.polaris.api-0.1.0-universal.dbxp",
+      "sha256": "c7a1bdc795a7deef59ebc826970adbcc0be524d2dd016f3aa56cdbbcf3d046e4",
+      "size": 48869
+    }
+  ]
+}
