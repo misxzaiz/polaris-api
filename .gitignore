@@ -1,5 +1,8 @@
 node_modules/
-dist/*.dbxp
+/backend/target/
+/dist/
+/.dbx-dev/
+.dbx-repository-signing-key.env
 *.log
 .DS_Store
 .vscode/

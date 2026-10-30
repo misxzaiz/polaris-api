@@ -1,73 +1,47 @@
 # polaris-api
 
-DBX 插件 —— **API 资产库**：从 OpenAPI/Swagger 与 Postman Collection 导入接口，
-整理为可搜索的目录树；浏览每个接口的方法、路径、参数、请求体与响应 Schema，
-一键复制 cURL、导出 Markdown。
+DBX 插件 `com.polaris.api` —— API 请求客户端（Rust sidecar 版）。
 
-- 插件 ID：`com.polaris.api`
-- 贡献点：`workbench`（`com.polaris.api.workbench`）
-- 入口：`ui/index.html`（纯前端 universal，无原生 sidecar）
-- 权限：无（默认离线；从 URL 拉取需 `host.network` 目标域名授权）
+从 relay-devkit api 模块移植：多 tab、环境变量、cURL 导入导出、Params/Headers/Body 编辑；响应支持表格 / 对象树 / 路径下钻 / 字段筛选 / 图片与时间戳智能渲染。
 
-## 为什么是「资产库」而不是又一个 HTTP 客户端
+请求经原生 sidecar（reqwest）发送，无 CORS / 混合内容 / 禁发头限制，等效 cURL。
 
-DBX 官方商店已有 **HTTP Client**（`com.jettech.httpclient`，Go sidecar 发送任意请求）。
-polaris-api 不与它正面竞争，而是补一个它没有的角色：
-
-| 能力 | HTTP Client | polaris-api |
-|---|---|---|
-| 构造 + 发送任意 HTTP（sidecar） | ✅ | — |
-| **导入 OpenAPI / Swagger** | ❌ | ✅ |
-| **导入 Postman Collection** | 环境变量导入（JSON） | ✅ 完整集合树 |
-| 目录树浏览 / 搜索 / 分组 | 集合（手写） | 从规格自动建树 |
-| 参数 / 请求体 / 响应 Schema 阅读 | 点选 | **自动解析展示** |
-| 一键复制 cURL / Markdown | 导出一对一 | ✅ 从规格生成 |
-
-定位一句话：**把散落的接口文档变成 DBX 里可搜、可读、可复制的 API 资产库。**
-
-## 使用
-
-1. DBX 插件中心安装本插件（.dbxp 见 Release 或 dist/）。
-2. 打开工作台（插件列表 → polaris-api，或连接清单 → polaris-api）。
-3. 点击「导入 OpenAPI / Postman」→ 粘贴 JSON / 上传文件 / 填 URL。
-4. 目录树自动生成；点接口看详情；搜索、复制、导出。
-
-## 目录结构
+## 架构
 
 ```
 polaris-api/
-├── manifest.json        # Manifest v1：身份、贡献点 workbench、校验
-├── dbx-plugin.toml      # 打包：仅 assets/ 与 ui/
-├── assets/plugin.svg    # 图标
-├── ui/
-│   ├── index.html       # 工作台骨架
-│   ├── app.css          # 主题令牌 + 样式
-│   ├── importer.js      # OpenAPI 2/3 + Postman v2.1 → 统一目录树
-│   ├── dbx-bridge.js    # window.dbxPlugin 封装（降级兼容无宿主）
-│   └── app.js           # 渲染 / 搜索 / 导入 / 复制 / 持久化
-├── scripts/package.mjs  # 生成 .dbxp（zip + checksums）
-└── tools/               # 本地验证脚本
+├── manifest.json          # DBX manifest v1，含 backend + ui entrypoint
+├── dbx-plugin.toml        # 打包配置（Rust backend）
+├── backend/               # Rust sidecar：reqwest 发请求，stdio-jsonl 协议
+│   ├── Cargo.toml         # dbx-plugin-sdk + reqwest(rustls-tls-native-roots) + base64
+│   └── src/main.rs        # http/request 方法处理
+├── ui/                    # 沙箱 UI（无网络，经 dbxPlugin.invoke 调 sidecar）
+│   ├── index.html         # #viewApi SPA 骨架（自 relay-devkit panel.jsx）
+│   ├── app.css            # 自 relay-devkit main.css 移植，.pa-root 作用域 + DBX 双主题
+│   ├── app.js             # 请求客户端主体（多 tab/环境/cURL/响应视图）
+│   ├── core.js            # DOM/格式化工具（自 core/dom.js + http.js）
+│   ├── json-view.js       # JSON 渲染核心（路径下钻/对象树/表格/过滤）
+│   ├── curl.js            # cURL 解析/生成（parseCurl/toCurl）
+│   └── dbx-bridge.js      # dbxPlugin 封装（storage 走 host.storage）
+├── assets/plugin.svg
+└── .github/workflows/plugin-release.yml   # 多平台编译矩阵（引用 dbx 官方 reusable workflow）
 ```
 
-## 构建
+## 开发
 
 ```bash
-node scripts/package.mjs
-# → dist/polaris-api-<version>-universal.dbxp
+# 浏览器开发模式（不需 DBX 宿主）
+dbx-plugin dev --path . --port 5190
+
+# 构建本机平台的 .dbxp 候选
+dbx-plugin package .
 ```
 
-无需编译、无需原生依赖。产物可按 DBX 本地安装，或提交到 `t8y2/dbx-store` 过审上架。
+## 发布
 
-## 开发 / 验证
+GitHub Release published → `.github/workflows/plugin-release.yml` 自动为所有目标平台编译 unsigned candidate，产出 `release-candidates.json`。DBX Store 审查签名后上架。
 
-- 浏览器直接打开 `ui/index.html`：DBXBridge 无宿主时落回 localStorage，可离线调试导入与渲染。
-- 组件接口：`window.POLARIS_API.{loadOpenAPI, loadPostman, loadAuto, toCurl, toMarkdown}`。
+## 版本历史
 
-## 与 HTTP Client 的关系
-
-不重复、不冲突。HTTP Client 负责「发送」，polaris-api 负责「整理与阅读文档」。
-未来可将 polaris-api 选中的接口，以 `executeCommand` 方式交棒给宿主/HTTP Client。
-
-## License
-
-Apache-2.0
+- v0.2.0 — 重构为 Rust sidecar 架构，解决 v0.1.x 跨域不可用问题
+- v0.1.x — universal 前端插件（API 资产库方向，已被取代）

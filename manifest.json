@@ -3,9 +3,9 @@
   "manifest_version": 1,
   "id": "com.polaris.api",
   "name": "polaris-api",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "publisher": "misxzaiz",
-  "description": "API 资产库：从 OpenAPI/Swagger 与 Postman Collection 导入接口，整理为可搜索的目录树；浏览每个接口的方法、路径、参数、请求体与响应 Schema，一键复制 cURL、导出 Markdown/JSON。",
+  "description": "API 请求客户端（sidecar 版）：多 tab、环境变量、cURL 导入导出、Params/Headers/Body 编辑；响应支持表格 / 对象树 / 路径下钻 / 字段筛选。请求经原生 sidecar（reqwest）发送，无 CORS/混合内容/禁发头限制，等效 cURL。",
   "icon": "assets/plugin.svg",
   "permissions": ["host.storage"],
   "engines": {
@@ -13,6 +13,9 @@
     "host_api": "1"
   },
   "entrypoints": {
+    "backend": {
+      "executable": "bin/dbx-plugin-polaris-api"
+    },
     "ui": {
       "root": "ui",
       "entry": "ui/index.html"
@@ -23,18 +26,18 @@
       "type": "workbench",
       "id": "com.polaris.api.workbench",
       "label": "polaris-api",
-      "description": "API 资产库：导入 OpenAPI/Postman Collection，浏览与整理接口目录。",
+      "description": "API 请求客户端：多 tab、环境变量、cURL 导入导出、响应多视图，sidecar 原生发送。",
       "icon": "assets/plugin.svg"
     }
   ],
   "localizations": {
     "zh-CN": {
       "name": "polaris-api",
-      "description": "API 资产库：从 OpenAPI/Swagger 与 Postman Collection 导入接口，整理为可搜索目录树；浏览方法、路径、参数、请求体与响应 Schema，一键复制 cURL、导出 Markdown/JSON。",
+      "description": "API 请求客户端（sidecar 版）：多 tab、环境变量、cURL 导入导出、Params/Headers/Body 编辑；响应支持表格 / 对象树 / 路径下钻 / 字段筛选。请求经原生 sidecar（reqwest）发送，无 CORS/混合内容/禁发头限制，等效 cURL。",
       "contributions": {
         "com.polaris.api.workbench": {
           "label": "polaris-api",
-          "description": "API 资产库：导入 OpenAPI/Postman Collection，浏览与整理接口目录。"
+          "description": "API 请求客户端：多 tab、环境变量、cURL 导入导出、响应多视图，sidecar 原生发送。"
         }
       }
     }

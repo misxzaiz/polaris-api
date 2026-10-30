@@ -1,85 +1,120 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>polaris-api</title>
   <link rel="stylesheet" href="./app.css" />
 </head>
-<body data-dbx-theme="light">
-  <div id="app" class="pa-root">
-    <!-- 顶栏 -->
-    <header class="pa-topbar">
-      <div class="pa-brand">
-        <img id="brandIcon" src="" alt="" width="20" height="20" />
-        <span class="pa-title">polaris-api</span>
-        <span id="collectionName" class="pa-collection"></span>
+<body>
+  <!-- 根容器：作用域隔离（.pa-root），data-dbx-theme 由 dbx-bridge.js 在 ready 后写入 -->
+  <div id="root" class="pa-root">
+    <header class="topbar">
+      <button class="icon-btn" id="toggleSide" title="折叠/展开侧栏">☰</button>
+      <div class="brand"><span class="dot"></span>API<small>请求客户端</small></div>
+      <div class="spacer"></div>
+      <div class="env-wrap">
+        <button class="env-sel" id="envSel"><span class="ehex">⬡</span><span id="envName">无环境</span><span class="car">▼</span></button>
+        <div class="env-menu" id="envMenu"></div>
       </div>
-      <div class="pa-actions">
-        <input id="search" class="pa-input pa-search" type="search" placeholder="搜索接口 / 路径 / 方法…" />
-        <button id="btnImport" class="pa-btn pa-btn--primary" type="button">导入 OpenAPI / Postman</button>
-        <button id="btnExportMd" class="pa-btn" type="button" title="导出当前接口为 Markdown">导出 MD</button>
-      </div>
+      <button class="top-act" id="curlImportBtn" title="粘贴 cURL 导入为请求">⤓ 导入 cURL</button>
+      <button class="top-act" id="layoutBtn" title="切换 上下/左右 布局">⇄ 左右</button>
+      <div class="hint"><span><kbd>⌘/Ctrl</kbd> <kbd>↵</kbd> 发送</span><span><kbd>⌘/Ctrl</kbd> <kbd>S</kbd> 保存</span></div>
     </header>
 
-    <!-- 导入面板 -->
-    <section id="importPanel" class="pa-import" hidden>
-      <div class="pa-import__inner">
-        <h2>导入 API 定义</h2>
-        <div class="pa-import__tabs">
-          <button id="tabPaste" class="pa-tab" type="button">粘贴 JSON</button>
-          <button id="tabFile" class="pa-tab" type="button">上传文件</button>
-          <button id="tabUrl" class="pa-tab" type="button">从 URL 拉取</button>
+    <div class="main" id="main">
+      <aside class="side">
+        <div class="side-head">
+          <span class="t">集合 · COLLECTIONS</span>
+          <button class="mini-btn" id="newGroup" title="新建分组">＋</button>
+          <button class="mini-btn" id="importBtn" title="导入集合 JSON">↧</button>
+          <button class="mini-btn" id="exportBtn" title="导出集合 JSON">↥</button>
         </div>
-
-        <div id="panePaste" class="pa-pane">
-          <textarea id="pasteInput" class="pa-textarea" placeholder="粘贴 OpenAPI (swagger/openapi) 或 Postman Collection v2.1 JSON…"></textarea>
-        </div>
-        <div id="paneFile" class="pa-pane" hidden>
-          <input id="fileInput" class="pa-file" type="file" accept=".json,.yaml,.yml,.openapi.yaml,.postman_collection.json" />
-          <p class="pa-hint">支持 .json；YAML 即将支持。文件需为合法 OpenAPI / Swagger / Postman v2.1。</p>
-        </div>
-        <div id="paneUrl" class="pa-pane" hidden>
-          <input id="urlInput" class="pa-input" type="url" placeholder="https://example.com/openapi.json" />
-          <p class="pa-hint">需要网络权限：dbx 沙箱默认禁用；请在插件上启用 host.network 目标域名后才可用。</p>
-        </div>
-
-        <div class="pa-import__foot">
-          <button id="btnDoImport" class="pa-btn pa-btn--primary" type="button">开始导入</button>
-          <button id="btnCancelImport" class="pa-btn" type="button">取消</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- 主区：目录树 + 详情 -->
-    <main class="pa-main">
-      <aside class="pa-tree">
-        <div class="pa-tree__head">
-          <span id="treeTitle">目录</span>
-          <span id="count" class="pa-count"></span>
-        </div>
-        <ul id="tree" class="pa-tree__list"></ul>
-        <div id="emptyState" class="pa-empty">
-          <p>还没有导入任何 API</p>
-          <p class="pa-hint">点击「导入 OpenAPI / Postman」开始。</p>
-        </div>
+        <div class="side-search"><input id="search" placeholder="🔍  搜索已保存的请求…" /></div>
+        <div class="tree" id="tree"></div>
       </aside>
 
-      <section id="detail" class="pa-detail" hidden>
-        <!-- 由 detail.js 渲染 -->
+      <section class="work">
+        <div class="tabbar" id="tabbar"></div>
+        <div class="reqbar">
+          <div class="method-wrap">
+            <button class="method-sel" id="methodSel"><span id="methodLabel">GET</span><span class="car">▼</span></button>
+            <div class="method-menu" id="methodMenu"></div>
+          </div>
+          <div class="url-wrap">
+            <input class="url-input" id="url" placeholder="请求 URL，支持 {{baseUrl}}/path、{{变量}} 占位" spellcheck="false" />
+            <div class="url-resolved" id="urlResolved"></div>
+          </div>
+          <button class="btn primary" id="sendBtn">发送 <span class="k">⌘↵</span></button>
+          <button class="btn" id="saveBtn">保存</button>
+          <button class="btn icon ghost" id="curlBtn" title="复制为 cURL">cURL</button>
+        </div>
+
+        <div class="split" id="split">
+          <div class="req-region">
+            <div class="subtabs" id="reqSubtabs">
+              <button class="subtab active" data-rt="params">Params<span class="badge" id="bParams"></span></button>
+              <button class="subtab" data-rt="headers">Headers<span class="badge" id="bHeaders"></span></button>
+              <button class="subtab" data-rt="body">Body<span class="badge" id="bBody"></span></button>
+            </div>
+            <div class="pane" id="reqPane"></div>
+          </div>
+
+          <div class="divider" id="divider" title="拖动调整大小"></div>
+
+          <div class="res-region">
+            <div class="res-status" id="resStatus" style="display:none"></div>
+            <div class="subtabs" id="resSubtabs" style="display:none">
+              <button class="subtab" data-rv="table">表格</button>
+              <button class="subtab" data-rv="object">对象</button>
+              <button class="subtab" data-rv="raw">原始</button>
+              <button class="subtab" data-rv="preview">预览</button>
+              <button class="subtab" data-rv="headers">Headers<span class="badge" id="bResH"></span></button>
+              <span class="sp"></span>
+              <button class="tool" id="prettyBtn" title="美化单元格：图片缩略图 + 时间戳转可读时间（再次点击显示原始值）">✦ 美化</button>
+              <button class="tool" id="treeExpand" title="展开全部节点">⊞ 展开</button>
+              <button class="tool" id="treeCollapse" title="折叠全部节点">⊟ 折叠</button>
+              <button class="tool" id="wrapBtn" title="切换自动换行">⮐ 换行</button>
+              <button class="tool" id="copyResBtn" title="复制当前数据">⧉ 复制</button>
+              <button class="tool" id="dlBtn" title="下载响应体">↓ 下载</button>
+            </div>
+            <div class="res-tools" id="resTools" style="display:none"></div>
+            <div class="pane" id="resPane">
+              <div class="res-idle">
+                <div class="big">准备就绪</div>
+                输入 URL 点「发送」，或从左侧集合载入一个请求。
+                <div class="tips">
+                  · <b>多 tab</b>：顶部 ＋ 新建，双击标签可重命名<br>
+                  · <b>环境变量</b>：右上角切换环境，URL 里用 <b>{{baseUrl}}</b><br>
+                  · <b>导入 cURL</b>：右上角粘贴 curl 命令一键解析<br>
+                  · <b>查数据</b>：响应区「路径」下钻、「过滤」筛选，多视图切换<br>
+                  · <b>跨域</b>：请求经 sidecar 原生 reqwest 发送，无 CORS/混合内容/禁发头限制，等效 cURL
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
-      <section id="welcome" class="pa-welcome">
-        <img id="welcomeIcon" src="" alt="" width="48" height="48" />
-        <h1>polaris-api</h1>
-        <p>导入 OpenAPI / Swagger 或 Postman Collection，浏览、搜索、整理你的接口资产。</p>
-      </section>
-    </main>
+    </div>
+
+    <footer class="statusbar">
+      <span class="msg" id="statusMsg">就绪 · 请求经 sidecar 原生发送（无 CORS 限制）</span>
+      <span class="seg-r"><span>TABS <b id="stTabs">0</b></span><span>SAVED <b id="stSaved">0</b></span></span>
+    </footer>
+
+    <!-- 浮层必须位于 #root 内：core.js 的 $ 作用域为 #root，root.querySelector 才能查到 -->
+    <input type="file" id="fileInput" accept="application/json,.json" style="display:none" />
+    <div class="modal-bg" id="modalBg"></div>
+    <div class="toast" id="toast"></div>
+    <div class="cell-tip" id="cellTip"></div>
   </div>
 
   <script>
     window.POLARIS_EXTERNAL = { dbxPlugin: null };
   </script>
-  <script src="./importer.js"></script>
+  <script src="./core.js"></script>
+  <script src="./json-view.js"></script>
+  <script src="./curl.js"></script>
   <script src="./dbx-bridge.js"></script>
   <script src="./app.js"></script>
 </body>
