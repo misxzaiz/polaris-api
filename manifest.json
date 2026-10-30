@@ -3,7 +3,7 @@
   "manifest_version": 1,
   "id": "com.polaris.api",
   "name": "polaris-api",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "misxzaiz",
   "description": "API 资产库：从 OpenAPI/Swagger 与 Postman Collection 导入接口，整理为可搜索的目录树；浏览每个接口的方法、路径、参数、请求体与响应 Schema，一键复制 cURL、导出 Markdown/JSON。",
   "icon": "assets/plugin.svg",

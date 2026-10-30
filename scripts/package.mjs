@@ -68,7 +68,7 @@ async function main() {
   if (!manifest.id || !manifest.version || !manifest.publisher) throw new Error("缺少 id/version/publisher");
 
   // 生成 .dbxp（ZIP 容器）。手动拼一个最小但有效的 ZIP（stored 无压缩，支持所有平台）
-  const zipBuf = await buildZip([...files, "checksums.json"], (f) => f === "checksums.json" ? Buffer.from(JSON.stringify({ hash: "sha256", files: checksums }, null, 2)) : contents.get(f));
+  const zipBuf = await buildZip([...files, "checksums.json"], (f) => f === "checksums.json" ? Buffer.from(JSON.stringify({ algorithm: "sha256", files: checksums }, null, 2)) : contents.get(f));
 
   const outPath = join(outDir, packageName);
   writeFileSync(outPath, zipBuf);
